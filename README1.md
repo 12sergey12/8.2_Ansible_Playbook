@@ -7,11 +7,11 @@
 3. Скачайте [Playbook](./playbook/) из репозитория с домашним заданием и перенесите его в свой репозиторий.
 4. Подготовьте хосты в соответствии с группами из предподготовленного playbook.
 
-## Основная часть
+### Основная часть
 
 1. Подготовьте свой inventory-файл `prod.yml`.
 
-,,,
+```
 root@baranovsa:/home/baranovsa/8.2_Ansible_Playbook/playbook/inventory# cat prod.yml
 ---
 clickhouse:
@@ -24,7 +24,7 @@ clickhouse:
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
       ansible_python_interpreter: python3
 root@baranovsa:/home/baranovsa/8.2_Ansible_Playbook/playbook/inventory#
-,,,
+```
 
 2. Допишите playbook: нужно сделать ещё один play, который устанавливает и настраивает [vector](https://vector.dev). Конфигурация vector должна деплоиться через template файл jinja2. От вас не требуется использовать все возможности шаблонизатора, просто вставьте стандартный конфиг в template файл. Информация по шаблонам по [ссылке](https://www.dmosk.ru/instruktions.php?object=ansible-nginx-install).
 
@@ -33,7 +33,7 @@ root@baranovsa:/home/baranovsa/8.2_Ansible_Playbook/playbook/inventory#
 4. Tasks должны: скачать дистрибутив нужной версии, выполнить распаковку в выбранную директорию, установить vector.
 
 site.yml
-,,,
+```
 root@baranovsa:/home/baranovsa/8.2_Ansible_Playbook/playbook# cat site.yml
 ---
 - name: Install Clickhouse
@@ -115,18 +115,18 @@ root@baranovsa:/home/baranovsa/8.2_Ansible_Playbook/playbook# cat site.yml
         mode: "0644"
       notify:
 root@baranovsa:/home/baranovsa/8.2_Ansible_Playbook/playbook# 
-,,,
+```
 
 5. Запустите `ansible-lint site.yml` и исправьте ошибки, если они есть.
 
-,,,
+```
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook# ansible-lint site.yml
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook# 
-,,,
+```
 
 6. Попробуйте запустить playbook на этом окружении с флагом `--check`.
 
-,,,
+```
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook# ansible-playbook -i ./inventory/prod.yml site.yml --check
 
 PLAY [Install Clickhouse] ****************************************************************************
@@ -146,11 +146,11 @@ RUNNING HANDLER [Start clickhouse service] *************************************
 PLAY RECAP *******************************************************************************************
 clickhouse-01          	: ok=2	changed=1	unreachable=0	failed=1	skipped=0	rescued=0	ignored=0   
 
-,,,
+```
 
 7. Запустите playbook на `prod.yml` окружении с флагом `--diff`. Убедитесь, что изменения на системе произведены.
 
-,,,
+```
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook# ansible-playbook -i ./inventory/prod.yml site.yml --diff
 
 PLAY [Install Clickhouse] ****************************************************************************
@@ -267,11 +267,11 @@ PLAY RECAP *********************************************************************
 clickhouse-01          	: ok=9	changed=4	unreachable=0	failed=0	skipped=0	rescued=0	ignored=0   
 
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook#
-,,,
+```
 
 8. Повторно запустите playbook с флагом `--diff` и убедитесь, что playbook идемпотентен.
 
-,,,
+```
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook# ansible-playbook -i ./inventory/prod.yml site.yml --diff
 
 PLAY [Install Clickhouse] ****************************************************************************
@@ -307,8 +307,7 @@ PLAY RECAP *********************************************************************
 clickhouse-01          	: ok=8	changed=1	unreachable=0	failed=0	skipped=0	rescued=0	ignored=0   
 
 root@baranovsa:/home/baranovsa/mnt-homeworks/08-ansible-02-playbook/playbook#
-
-,,,
+```
 
 9. Подготовьте README.md-файл по своему playbook. В нём должно быть описано: что делает playbook, какие у него есть параметры и теги. Пример качественной документации ansible playbook по [ссылке](https://github.com/opensearch-project/ansible-playbook).
 
