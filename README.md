@@ -1,8 +1,11 @@
 ### Описание Playbook
 
 Playbook находится в файле [site.yml](./playbook/site.yml)
-Inventory находится в файле [prod.yml](./playbook/prod.yml)
-Переменные находятся в файле [vars.yml](./playbook/vars.yml)
+
+Inventory находится в файле [prod.yml](./playbook/inventory/prod.yml)
+
+Переменные находятся в файле [vars.yml](./playbook/group_vars/clickhouse/vars.yml)
+
 Playbook устанавливает сервисы clickhouse и vector.
 
 Для установки сервиса clickhouse с сайта разработчика устанавливаются пакеты:
