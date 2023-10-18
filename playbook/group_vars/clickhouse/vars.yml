@@ -1,0 +1,13 @@
+---
+clickhouse_version: "22.3.3.44"
+clickhouse_noarch_packages:
+  - clickhouse-client
+  - clickhouse-server
+clickhouse_amd64_packages:
+  - clickhouse-common-static
+
+
+#vector_version: "0.30.0"
+vector_version: "0.21.1"
+vector_amd64_packages:
+  - vector

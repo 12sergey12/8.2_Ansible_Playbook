@@ -1,0 +1,38 @@
+# Random Syslog-formatted logs
+[sources.syslog]
+type = "file"
+#type = "demo_logs"
+include = [ "/var/log/syslog" ]
+read_from = "end"
+#format = "syslog"
+#interval = 1
+
+# Parse Syslog logs
+# See the Vector Remap Language reference for more info: https://vrl.dev
+[transforms.parse_syslog]
+type = "remap"
+inputs = ["syslog"]
+source = '''
+. = parse_syslog!(string!(.message))
+'''
+
+# Print parsed logs to stdout
+#[sinks.print]
+#type = "console"
+#inputs = ["parse_logs"]
+#encoding.codec = "json"
+
+# Vector's GraphQL API (disabled by default)
+# Uncomment to try it out with the `vector top` command or
+# in your browser at http://localhost:8686
+[api]
+enabled = true
+address = "0.0.0.0:8686"
+
+[sinks.clickhouse]
+type = "clickhouse"
+inputs = ["syslog"]
+endpoint = "http://localhost:8123"
+database = "logs"
+table = "logs"
+skip_unknown_fields = true

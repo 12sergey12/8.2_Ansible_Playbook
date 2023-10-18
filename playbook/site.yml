@@ -1,0 +1,80 @@
+---
+- name: Install Clickhouse
+  hosts: clickhouse
+  handlers:
+    - name: Start clickhouse service
+      ansible.builtin.systemd:
+        name: clickhouse-server
+        state: started
+        enabled: true
+      become: true
+      become_user: root
+  tasks:
+    - name: Install clickhouse amd64 packages from internet
+      become: true
+      become_user: root
+      ansible.builtin.apt:
+        deb: "https://packages.clickhouse.com/deb/pool/main/c/clickhouse-common-static/clickhouse-common-static_{{ clickhouse_version }}_amd64.deb"
+      with_items: "{{ clickhouse_amd64_packages }}"
+      notify: Start clickhouse service
+    - name: Install clickhouse noarch packages from internet
+      become: true
+      become_user: root
+      ansible.builtin.apt:
+        deb: "https://packages.clickhouse.com/deb/pool/main/c/{{ item }}/{{ item }}_{{ clickhouse_version }}_all.deb"
+      with_items: "{{ clickhouse_noarch_packages }}"
+      notify: Start clickhouse service
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+    - name: Create database
+      ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+      register: create_db
+      failed_when: create_db.rc != 0 and create_db.rc != 82
+      changed_when: create_db.rc == 0
+      retries: 10
+      delay: 3
+      until: create_db.rc == 0 or create_db.rc == 82
+    - name: Create table
+      ansible.builtin.command: "clickhouse-client -q '
+        CREATE TABLE IF NOT EXISTS logs.logs (
+            apname String,
+            facility String,
+            hostname String,
+            message String,
+            msgid String,
+            procid Int,
+            severity String,
+            timestamp String,
+            version Int
+        ) ENGINE = MergeTree ORDER BY timestamp;'"
+      register: create_table
+      failed_when: create_table.rc != 0 and create_table.rc != 57
+      changed_when: create_table.rc == 0
+- name: Install Vector
+  hosts: clickhouse
+  handlers:
+    - name: Restart vector service
+      ansible.builtin.systemd:
+        name: vector
+        state: restarted
+        enabled: true
+      become: true
+      become_user: root
+  tasks:
+    - name: Install vector packages from internet
+      become: true
+      become_user: root
+      ansible.builtin.apt:
+        deb: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1_amd64.deb"
+      notify: Restart vector service
+    - name: Template a config to /etc/vector/vector.toml
+      become: true
+      become_user: root
+      ansible.builtin.template:
+        src: templates/vector.toml
+        dest: /etc/vector/vector.toml
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Restart vector service
